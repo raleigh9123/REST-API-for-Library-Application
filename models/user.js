@@ -1,8 +1,16 @@
+/**
+ * 
+ * @description: Sequelize model for User
+ * 
+ */
+
 const Sequelize = require('sequelize');
 
 module.exports = (sequelize) => {
   class User extends Sequelize.Model {}
 
+  // firstName and lastName require letters only validated via Regex
+  // emailAddress requires a unique value and also requires an valid email (e.g. user@domain.com)
   User.init({
     id: {
       type: Sequelize.INTEGER,
@@ -12,30 +20,38 @@ module.exports = (sequelize) => {
     firstName: {
       type: Sequelize.STRING,
       allowNull:false,
-      unique: false,
+      validate: {
+        is: /^[a-z]+$/i,
+      },
     },
     lastName: {
       type: Sequelize.STRING,
       allowNull:false,
-      unique: false,
+      validate: {
+        is: /^[a-z]+$/i,
+      },
     },
     emailAddress: {
       type: Sequelize.STRING,
       allowNull:false,
-      isEmail: true,
       unique: true,
+      validate: {
+        isEmail: true,
+      }
     },
     password: {
       type: Sequelize.STRING,
       allowNull:false,
-      unique: false,
     }
   }, {sequelize});
 
+  // User may be associated with many courses
   User.associate = models => {
      User.hasMany(models.Course, {
-       foreignKey: "userId",
-       allowNull:false
+      foreignKey: {
+        fieldName: "userId",
+        allowNull:false
+      }
      })
   }
 

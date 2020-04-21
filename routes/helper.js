@@ -1,3 +1,15 @@
+/** 
+ * Helper functions for the routes files
+ * 
+ * @description: File includes the asyncHandler and authenticateUser functions to simplify route code
+ * Functions are exported via module.exports
+ * 
+ */
+
+const auth = require('basic-auth');
+const bcryptjs = require('bcryptjs');
+const { User } = require('../models');
+
 // Asynchronous Function Route Handler
 function asyncHandler(callback) {
     return async(req,res,next) => {
@@ -38,13 +50,10 @@ const authenticateUser = async(req, res, next) => {
         message = 'Auth header not found.'
     }
     if(message) {
-        console.warn(message);
         res.status(401).json({message: `Access denied: ${message}`})
     } else {
         next();
     }
 };
-
-
 
 module.exports = {asyncHandler, authenticateUser}
