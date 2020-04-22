@@ -27,7 +27,7 @@ const postValidations = [
 
 // GET /api/courses --> STATUS 200 - Returns a list of courses (including the user that owns each course)
 router.get('/', asyncHandler(async (req, res) => {
-    const allCourses = await Course.findAll();
+    const allCourses = await Course.findAll({ attributes: ['title', 'description', 'estimatedTime', 'materialsNeeded'] });
     res.status(200).json(allCourses);
 }));
 
@@ -60,8 +60,8 @@ router.post('/', authenticateUser, [postValidations], asyncHandler(async (req, r
                 // Pass current userId into new course to associate data relationship
                 newCourse.userId = userId;
             }
-            await Course.create(newCourse);
-            res.status(201).location('/').end();
+            const courseRecord = await Course.create(newCourse);
+            res.status(201).location(`/api/courses/${courseRecord.id}`).end();
         } catch (error) {
             // If Sequelize fails to create a new course, generate friendly error message
             if (error.name === 'SequelizeValidationError' || error.name === 'SequelizeForeignKeyConstraintError') {
@@ -75,7 +75,7 @@ router.post('/', authenticateUser, [postValidations], asyncHandler(async (req, r
 }));
 
 // PUT /api/courses/:id --> STATUS 204 - Updates a course and returns no content
-router.put('/:id', authenticateUser, asyncHandler(async (req, res) => {
+router.put('/:id', authenticateUser, [postValidations], asyncHandler(async (req, res) => {
     // Attempt to get the validation result from the Request object.
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
